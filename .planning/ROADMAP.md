@@ -22,7 +22,12 @@ Build the `general` repo — the shared scripts, hooks, and templates that power
   2. Running `bats tests/` reports every test as failed or skipped — zero passing tests (nothing is implemented yet)
   3. Test cases cover the full workflow: fresh temp git repo setup, each command invocation, git commit verification, and all error cases (zero matches, multiple matches)
   4. bats-assert and bats-support are available (installed or vendored) so `assert_output`, `assert_failure`, etc. work
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Vendor bats-core/assert/support as git submodules; create shared setup helper and ./test runner
+- [ ] 01-02-PLAN.md — Write failing bats tests for infrastructure (hooks, templates) and core scripts (add, done, block, drop)
+- [ ] 01-03-PLAN.md — Write failing bats tests for discovery scripts (list, review, session)
 
 ### Phase 2: Infrastructure
 **Goal**: The template and pre-commit hook exist and protect every future commit; infrastructure tests go green
