@@ -29,10 +29,10 @@ Requirements for the general repo — scripts, hooks, templates, and tests.
 
 ### Testing
 
-- [ ] **TEST-01**: Integration test creates a fresh temp git repo and runs full workflow end-to-end
-- [ ] **TEST-02**: Test covers: `add`, `done`, `block`, `drop`, `list` (with filter combinations), `review`
-- [ ] **TEST-03**: Test verifies git commits were created for each operation (correct message format, correct files)
-- [ ] **TEST-04**: Test verifies error cases: zero matches returns exit 1, multiple matches lists candidates
+- [ ] **TDD-01**: bats-core test suite is set up with bats-assert and bats-support available (installed or vendored in `tests/`)
+- [ ] **TDD-02**: bats test cases written for infrastructure: pre-commit hook validation (valid files, missing frontmatter, bad filename) and template structure
+- [ ] **TDD-03**: bats test cases written for core scripts: `add` (all flags, non-interactive), `done`/`block`/`drop` (move + commit), error cases (zero matches, multiple matches)
+- [ ] **TDD-04**: bats test cases written for discovery scripts: `list` (all filter combinations), `review` (default and --days), `session` (tmux attach/create)
 
 ## v2 Requirements
 
@@ -68,30 +68,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCPT-01 | — | Pending |
-| SCPT-02 | — | Pending |
-| SCPT-03 | — | Pending |
-| SCPT-04 | — | Pending |
-| SCPT-05 | — | Pending |
-| SCPT-06 | — | Pending |
-| SCPT-07 | — | Pending |
-| SCPT-08 | — | Pending |
-| SCPT-09 | — | Pending |
-| SCPT-10 | — | Pending |
-| SCPT-11 | — | Pending |
-| INFR-01 | — | Pending |
-| INFR-02 | — | Pending |
-| INFR-03 | — | Pending |
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| TEST-03 | — | Pending |
-| TEST-04 | — | Pending |
+| TDD-01 | Phase 1 | Pending |
+| TDD-02 | Phase 1 | Pending |
+| TDD-03 | Phase 1 | Pending |
+| TDD-04 | Phase 1 | Pending |
+| INFR-01 | Phase 2 | Pending |
+| INFR-02 | Phase 2 | Pending |
+| INFR-03 | Phase 2 | Pending |
+| SCPT-01 | Phase 3 | Pending |
+| SCPT-02 | Phase 3 | Pending |
+| SCPT-03 | Phase 3 | Pending |
+| SCPT-04 | Phase 3 | Pending |
+| SCPT-05 | Phase 3 | Pending |
+| SCPT-06 | Phase 3 | Pending |
+| SCPT-07 | Phase 3 | Pending |
+| SCPT-08 | Phase 4 | Pending |
+| SCPT-09 | Phase 4 | Pending |
+| SCPT-10 | Phase 4 | Pending |
+| SCPT-11 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
-- Mapped to phases: 0 (pre-roadmap)
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-23*
-*Last updated: 2026-02-23 after initial definition*
+*Last updated: 2026-02-23 after TDD restructure*
