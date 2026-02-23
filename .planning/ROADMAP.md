@@ -74,15 +74,15 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Implement `list` script: filter by --project, --keyword, --since, --status; structured one-per-line output
-- [ ] 04-02-PLAN.md — Implement `review` script: group todos by status with per-status counts for time window
-- [ ] 04-03-PLAN.md — Implement `session` script: tmux create/attach to `todo` session; verify 100% full suite pass
+- [x] 04-01-PLAN.md — Implement `list` script: filter by --project, --keyword, --since, --status; structured one-per-line output
+- [x] 04-02-PLAN.md — Implement `review` script: group todos by status with per-status counts for time window
+- [x] 04-03-PLAN.md — Implement `session` script: tmux create/attach to `todo` session; verify 100% full suite pass
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Test Suite | 0/TBD | Not started | - |
-| 2. Infrastructure | 0/TBD | Not started | - |
-| 3. Core Scripts | 0/TBD | Not started | - |
-| 4. Discovery Scripts | 0/TBD | Not started | - |
+| 1. Test Suite | 3/3 | Complete | 2026-02-23 |
+| 2. Infrastructure | 1/1 | Complete | 2026-02-23 |
+| 3. Core Scripts | 2/2 | Complete | 2026-02-23 |
+| 4. Discovery Scripts | 3/3 | Complete | 2026-02-23 |
