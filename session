@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+REPO_ARG="$1"
+
+if [[ -z "$REPO_ARG" ]]; then
+  echo "usage: session [business|personal]" >&2
+  exit 1
+fi
+
+case "$REPO_ARG" in
+  business)
+    REPO_PATH="${TODOS_BUSINESS_REPO:-$HOME/business}"
+    ;;
+  personal)
+    REPO_PATH="${TODOS_PERSONAL_REPO:-$HOME/personal}"
+    ;;
+  *)
+    echo "usage: session [business|personal]" >&2
+    exit 1
+    ;;
+esac
+
+SESSION="todo"
+
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  tmux attach-session -t "$SESSION"
+else
+  tmux new-session -d -s "$SESSION" -c "$REPO_PATH"
+  tmux send-keys -t "$SESSION" "claude" Enter
+  tmux attach-session -t "$SESSION"
+fi
