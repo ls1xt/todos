@@ -39,7 +39,10 @@ Plans:
   3. `hooks/pre-commit` rejects a staged file whose name does not match `YYYY-MM-DD-*.md` with a clear error message to stderr
   4. Valid files pass the pre-commit hook without errors
   5. All bats tests tagged for infrastructure now pass
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 02-01-PLAN.md — Create templates/todo.md skeleton and hooks/pre-commit validator; all 12 infrastructure tests green
 
 ### Phase 3: Core Scripts
 **Goal**: User can capture a todo by speaking and have it committed in under 3 seconds; core script tests go green
