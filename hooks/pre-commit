@@ -1,0 +1,47 @@
+#!/bin/bash
+# pre-commit hook: validates staged todo files
+# Checks: filename matches YYYY-MM-DD-*.md, required frontmatter fields present
+
+set -e
+
+# Get list of staged files
+STAGED=$(git diff --cached --name-only)
+
+for filepath in $STAGED; do
+  basename=$(basename "$filepath")
+
+  # Only process files matching todo filename pattern: YYYY-MM-DD-*.md
+  if [[ ! "$basename" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}-.+\.md$ ]]; then
+    # Check if it looks like a .md file under a todo directory but has wrong format
+    # Files like open/buy-milk.md (wrong format) must fail
+    # Files like README.md (not a todo at all) must pass silently
+    # We detect "todo-like" files by checking if they are in known todo dirs (open/, done/, blocked/, dropped/)
+    dir=$(dirname "$filepath")
+    case "$dir" in
+      open|done|blocked|dropped)
+        # It's in a todo directory but has the wrong filename format
+        echo "ERROR: '$basename' does not match expected format YYYY-MM-DD-<slug>.md" >&2
+        exit 1
+        ;;
+      *)
+        # Not in a todo directory — skip silently
+        continue
+        ;;
+    esac
+  fi
+
+  # It's a valid-format todo filename — check its frontmatter
+  content=$(git show ":$filepath")
+
+  if ! echo "$content" | grep -q "^created:"; then
+    echo "ERROR: '$basename' is missing required frontmatter field: created" >&2
+    exit 1
+  fi
+
+  if ! echo "$content" | grep -q "^priority:"; then
+    echo "ERROR: '$basename' is missing required frontmatter field: priority" >&2
+    exit 1
+  fi
+done
+
+exit 0
