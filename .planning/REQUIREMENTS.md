@@ -23,9 +23,9 @@ Requirements for the general repo — scripts, hooks, templates, and tests.
 
 ### Infrastructure
 
-- [ ] **INFR-01**: `hooks/pre-commit` validates YAML frontmatter has required fields (`created`, `priority`)
-- [ ] **INFR-02**: `hooks/pre-commit` validates staged todo files match `YYYY-MM-DD-*.md` filename pattern
-- [ ] **INFR-03**: `templates/todo.md` provides skeleton with all frontmatter placeholders filled
+- [x] **INFR-01**: `hooks/pre-commit` validates YAML frontmatter has required fields (`created`, `priority`)
+- [x] **INFR-02**: `hooks/pre-commit` validates staged todo files match `YYYY-MM-DD-*.md` filename pattern
+- [x] **INFR-03**: `templates/todo.md` provides skeleton with all frontmatter placeholders filled
 
 ### Testing
 
@@ -72,9 +72,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TDD-02 | Phase 1 | Complete |
 | TDD-03 | Phase 1 | Complete |
 | TDD-04 | Phase 1 | Complete |
-| INFR-01 | Phase 2 | Pending |
-| INFR-02 | Phase 2 | Pending |
-| INFR-03 | Phase 2 | Pending |
+| INFR-01 | Phase 2 | Complete |
+| INFR-02 | Phase 2 | Complete |
+| INFR-03 | Phase 2 | Complete |
 | SCPT-01 | Phase 3 | Pending |
 | SCPT-02 | Phase 3 | Pending |
 | SCPT-03 | Phase 3 | Pending |

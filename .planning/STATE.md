@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 
 ## Current Position
 
-Phase: 1 of 4 (Infrastructure)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-23 — Roadmap created
+Phase: 2 of 4 (Infrastructure)
+Plan: 1 of 1 in current phase
+Status: Phase 2 complete — ready for Phase 3
+Last activity: 2026-02-23 — Phase 2 execution complete
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -45,6 +45,8 @@ Recent decisions affecting current work:
 - Files over database: grep is the query engine; markdown survives any tooling change
 - Status via directories: moving a file changes status; no metadata to sync
 - Non-interactive safety: scripts must not block on $EDITOR or TTY input
+- Directory-based todo detection in pre-commit: files in open/done/blocked/dropped are validated; others silently skipped
+- Pre-commit reads staged content via git show :<filepath> to validate exactly what will be committed
 
 ### Pending Todos
 
@@ -57,5 +59,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Roadmap created — ready to plan Phase 1
+Stopped at: Completed 02-01-PLAN.md — Phase 2 complete, ready for Phase 3
 Resume file: None
