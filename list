@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -e
+
+STATUS="open"
+PROJECT=""
+KEYWORD=""
+SINCE=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --status)  STATUS="$2";  shift 2 ;;
+    --project) PROJECT="$2"; shift 2 ;;
+    --keyword) KEYWORD="$2"; shift 2 ;;
+    --since)   SINCE="$2";   shift 2 ;;
+    *) shift ;;
+  esac
+done
+
+# Compute cutoff date if --since provided
+CUTOFF=""
+if [[ -n "$SINCE" ]]; then
+  DAYS="${SINCE%d}"
+  # Try GNU date first, fall back to BSD date
+  CUTOFF=$(date -d "${DAYS} days ago" +%Y-%m-%d 2>/dev/null \
+           || date -v-"${DAYS}"d +%Y-%m-%d 2>/dev/null || true)
+fi
+
+STATUS_DIR="${STATUS}"
+
+[[ -d "$STATUS_DIR" ]] || exit 0
+
+for file in "$STATUS_DIR"/*.md; do
+  [[ -f "$file" ]] || continue
+
+  PRIORITY=$(grep -m1 '^priority:' "$file" | sed 's/priority:[[:space:]]*//')
+  PROJECT_VAL=$(grep -m1 '^project:' "$file" | sed 's/project:[[:space:]]*//')
+  KEYWORDS_VAL=$(grep -m1 '^keywords:' "$file" | sed 's/keywords:[[:space:]]*//')
+  CREATED_VAL=$(grep -m1 '^created:' "$file" | sed 's/created:[[:space:]]*//')
+
+  # Apply --project filter (exact match)
+  if [[ -n "$PROJECT" && "$PROJECT_VAL" != "$PROJECT" ]]; then
+    continue
+  fi
+
+  # Apply --keyword filter (substring match)
+  if [[ -n "$KEYWORD" && "$KEYWORDS_VAL" != *"$KEYWORD"* ]]; then
+    continue
+  fi
+
+  # Apply --since filter (date comparison)
+  if [[ -n "$CUTOFF" && "$CREATED_VAL" < "$CUTOFF" ]]; then
+    continue
+  fi
+
+  echo "${file}  ${PRIORITY}  ${PROJECT_VAL}  ${KEYWORDS_VAL}"
+done
