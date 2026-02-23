@@ -2,8 +2,10 @@
 # Shared bats helpers for todos-general test suite
 
 # Load bats-support and bats-assert (order matters: support first)
-load "$(dirname "$BATS_TEST_DIRNAME")/libs/bats-support/load"
-load "$(dirname "$BATS_TEST_DIRNAME")/libs/bats-assert/load"
+# BATS_TEST_DIRNAME is the directory of the running .bats file (tests/)
+# libs/ is a sibling of the .bats files, so we use BATS_TEST_DIRNAME directly
+load "$BATS_TEST_DIRNAME/libs/bats-support/load"
+load "$BATS_TEST_DIRNAME/libs/bats-assert/load"
 
 # Create a fresh isolated temp git repo for each test.
 # Sets: REPO_DIR (path to temp repo), SCRIPTS_DIR (path to project root scripts)
