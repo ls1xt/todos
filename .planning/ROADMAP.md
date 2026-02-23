@@ -71,7 +71,12 @@ Plans:
   3. `review` (and `review --days 14`) shows todos grouped by status with per-status counts for the specified window
   4. `session business` creates or attaches to a tmux session named `todo`, cds into the business repo, and launches `claude`
   5. `bats tests/` reports 100% passing — zero failures
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Implement `list` script: filter by --project, --keyword, --since, --status; structured one-per-line output
+- [ ] 04-02-PLAN.md — Implement `review` script: group todos by status with per-status counts for time window
+- [ ] 04-03-PLAN.md — Implement `session` script: tmux create/attach to `todo` session; verify 100% full suite pass
 
 ## Progress
 
