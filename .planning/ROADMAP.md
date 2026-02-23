@@ -55,7 +55,11 @@ Plans:
   4. `done <pattern>`, `block <pattern>`, `drop <pattern>` each move the matched file to the correct directory and auto-commit with the right message format (`done: <title>`, `block: <title>`, `drop: <title>`)
   5. Running a status script with no matches exits 1 with a stderr message; multiple matches lists all candidates without acting
   6. All bats tests for `add`, `done`, `block`, `drop` now pass
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Implement `add` script: create date-prefixed todo file, populate frontmatter from flags, auto-commit
+- [ ] 03-02-PLAN.md — Implement `done`, `block`, `drop` scripts: pattern-match in open/, move to target dir, auto-commit, error cases
 
 ### Phase 4: Discovery Scripts
 **Goal**: User can find, review, and resume work on todos from any terminal; all tests green
