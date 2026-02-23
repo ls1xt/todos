@@ -29,7 +29,7 @@ Requirements for the general repo — scripts, hooks, templates, and tests.
 
 ### Testing
 
-- [ ] **TDD-01**: bats-core test suite is set up with bats-assert and bats-support available (installed or vendored in `tests/`)
+- [x] **TDD-01**: bats-core test suite is set up with bats-assert and bats-support available (installed or vendored in `tests/`)
 - [ ] **TDD-02**: bats test cases written for infrastructure: pre-commit hook validation (valid files, missing frontmatter, bad filename) and template structure
 - [ ] **TDD-03**: bats test cases written for core scripts: `add` (all flags, non-interactive), `done`/`block`/`drop` (move + commit), error cases (zero matches, multiple matches)
 - [ ] **TDD-04**: bats test cases written for discovery scripts: `list` (all filter combinations), `review` (default and --days), `session` (tmux attach/create)
@@ -68,7 +68,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| TDD-01 | Phase 1 | Pending |
+| TDD-01 | Phase 1 | Complete |
 | TDD-02 | Phase 1 | Pending |
 | TDD-03 | Phase 1 | Pending |
 | TDD-04 | Phase 1 | Pending |
