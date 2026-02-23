@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DAYS=3
+
+usage() {
+  echo "Usage: sync [--days N]" >&2
+  echo "  --days N   Look back N days for commits (default: 3)" >&2
+  echo "" >&2
+  echo "Reads symlinks from linked/ in the current repo." >&2
+  echo "Create links with: ln -s /path/to/repo linked/<name>" >&2
+  exit 1
+}
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --days) DAYS="$2"; shift 2 ;;
+    -h|--help) usage ;;
+    *) echo "Unknown option: $1" >&2; usage ;;
+  esac
+done
+
+REPO_ROOT="$PWD"
+
+# --- Open todos ---
+echo "=== OPEN TODOS ==="
+if [[ -d "$REPO_ROOT/open" ]]; then
+  found_todos=0
+  for f in "$REPO_ROOT"/open/*.md; do
+    [[ -f "$f" ]] || continue
+    found_todos=1
+    slug=$(basename "$f" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
+    echo "FILE: $(basename "$f")"
+    echo "slug: $slug"
+    echo "title: $(echo "$slug" | tr '-' ' ')"
+    grep -E "^(project|keywords|body|priority):" "$f" 2>/dev/null || true
+    echo "---"
+  done
+  [[ $found_todos -eq 0 ]] && echo "(no open todos)"
+else
+  echo "(no open/ directory at $REPO_ROOT)"
+fi
+
+echo ""
+
+# --- Git log from linked repos ---
+echo "=== GIT LOG (last ${DAYS} days) ==="
+
+if [[ ! -d "$REPO_ROOT/linked" ]]; then
+  echo "(no linked/ directory — add symlinks with: ln -s /path/to/repo $REPO_ROOT/linked/<name>)"
+  exit 0
+fi
+
+found_repos=0
+for link in "$REPO_ROOT/linked"/*/; do
+  # Resolve symlink target
+  [[ -e "$link" ]] || continue
+  found_repos=1
+  name=$(basename "$link")
+  target=$(readlink -f "$link")
+  echo "--- REPO: $name ($target) ---"
+  git -C "$target" log \
+    --since="${DAYS} days ago" \
+    --no-merges \
+    --format="%h %ad %s" \
+    --date=short 2>/dev/null \
+    || echo "(git error or not a git repo)"
+  echo "---"
+  echo ""
+done
+
+if [[ $found_repos -eq 0 ]]; then
+  echo "(no symlinks found in $REPO_ROOT/linked/)"
+fi
