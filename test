@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Run the full bats test suite using vendored bats-core
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+exec "$SCRIPT_DIR/tests/libs/bats-core/bin/bats" "$SCRIPT_DIR/tests/" "$@"
