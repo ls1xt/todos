@@ -1,65 +1,92 @@
 ---
 name: t:git-sync
-description: Full git sync — mark completed todos as done AND propose new follow-up todos from linked repo commits
+description: Full bidirectional git sync — one agent per linked repo in parallel, close + propose
 argument-hint: [--days N]
 allowed-tools:
   - Bash
   - Read
+  - Task
 ---
 
 <objective>
-Bidirectional sync between linked repos and todos. Runs git-close then git-import in sequence. Use this as your default post-coding-session command.
+Spawn one Bash agent per linked repo in parallel. Each agent returns both CLOSE: and PROPOSE: results in a single git log pass. Aggregate: apply closes first, then present import proposals. Minimal context overhead — the heavy work happens in subagents.
 </objective>
 
 <process>
-## Step 1 — Resolve scripts
+## Step 1 — Resolve paths
 
-- If `./todos/sync` exists → sync=`./todos/sync`, done=`./todos/done`, add=`./todos/add`, list=`./todos/list`
+- If `./todos/list` exists → list=`./todos/list`, done=`./todos/done`, add=`./todos/add`, role=`./todos/.claude/git-agent-role.md`
 - Else strip `todos/` prefix
 
-## Step 2 — Run sync script once
+Parse `--days N` from `$ARGUMENTS` (default: 7).
+
+## Step 2 — Load open todos (compact)
 
 ```bash
-<sync> --days <N>   # default 7
+<list> --status open
 ```
 
-Capture full output — reuse it for both phases below.
+Build compact list: `#id [keywords] title`
 
-## Step 3 — Phase 1: Close (git → mark done)
+## Step 3 — Find linked repos
 
-Follow the same logic as `/todos:git-close`:
-- Match open todos against commits
-- Mark confident matches as done
-- Collect results
-
-## Step 4 — Phase 2: Import (git → propose new todos)
-
-Follow the same logic as `/todos:git-import`:
-- Find commits that suggest missing todos (follow-ups, TODOs in code, partial work)
-- Skip anything already covered by an open todo
-- Present proposals, collect user response, create confirmed ones
-
-## Step 5 — Combined report
-
-```
-git-sync: last N days, X repos
-
-── Closed ──────────────────────────────
-✓ #3  fix-parser-bug       ← abc1234 fix: parser handles edge cases
-✓ #7  implement-login      ← def5678 feat: login endpoint with JWT
-· #1  add-adapter          no match
-
-── Imported ────────────────────────────
-  1. [enty] medium  Write tests for login endpoint
-  2. [enty] low     Document crawler adapter API
-  (skip remaining)
-
-Add which? (e.g. "1 2", "all", "skip") →
+```bash
+ls linked/
 ```
 
-After import confirmation:
+## Step 4 — Spawn one agent per repo (ALL in parallel — single message)
+
+For each repo in `linked/`, spawn a Task tool call with subagent_type=`Bash`:
+
 ```
-git-sync done.
-  Closed: 2  |  Imported: 2  |  Open: 17
+Read the role file at <role> — it defines your output contract.
+
+REPO_PATH: linked/<repo-name>
+DAYS: <N>
+TODOS:
+<compact todos list>
+
+Return CLOSE: and PROPOSE: lines per the role file contract.
+If no commits: single line REPO: <name> — no commits
+```
+
+**Critical**: launch ALL agents in a **single message** (parallel tool calls), one per repo.
+
+## Step 5 — Apply closes immediately
+
+Parse all `CLOSE:` lines from all agents. For each:
+```bash
+<done> <id>
+```
+
+## Step 6 — Present combined report + proposals
+
+```
+t:git-sync — last N days, X repos
+
+── Closed ──────────────────────────────────────────────
+enty (8 commits):      ✓ #3 fix-parser-bug  ✓ #7 implement-login
+enty-docs (no commits)
+murmur (2 commits):    · no matches
+
+── Proposed ────────────────────────────────────────────
+  1. [enty] medium   Write tests for login endpoint     ← def5678
+  2. [enty] low      Document crawler adapter API        ← abc1234
+  3. [murmur] low    Clean up TODO in tmux injector      ← ghi9012
+
+Add which? ("all", "1 3", "skip") →
+```
+
+## Step 7 — Create confirmed todos
+
+For each confirmed proposal:
+```bash
+<add> "<title>" --priority <p> --project <project> --keywords <kw1,kw2,kw3> --body "<description>"
+```
+
+## Step 8 — Final summary (one line)
+
+```
+t:git-sync done.  Closed: 2  |  Imported: 1  |  Open: 16
 ```
 </process>

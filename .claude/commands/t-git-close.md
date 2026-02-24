@@ -1,66 +1,81 @@
 ---
 name: t:git-close
-description: Scan recent git commits and auto-mark matching open todos as done
+description: Scan linked repo commits in parallel and auto-mark matching todos as done
 argument-hint: [--days N]
 allowed-tools:
   - Bash
   - Read
+  - Task
 ---
 
 <objective>
-One direction only: git → todos. Scan commits from linked repos and mark open todos as done when a commit clearly delivers on that todo. Fast, no prompting.
+Spawn one Bash agent per linked repo in parallel. Each agent checks git log and returns compact CLOSE: results. Aggregate and apply. Keep main context lean.
 </objective>
 
 <process>
-## Step 1 — Resolve scripts
+## Step 1 — Resolve paths
 
-- If `./todos/sync` exists → sync=`./todos/sync`, done=`./todos/done`
-- If `./sync` exists → sync=`./sync`, done=`./done`
+- If `./todos/list` exists → list=`./todos/list`, done=`./todos/done`, role=`./todos/.claude/git-agent-role.md`
+- Else → list=`./list`, done=`./done`, role=`./.claude/git-agent-role.md`
 
-## Step 2 — Run sync script
+Parse `--days N` from `$ARGUMENTS` (default: 7).
+
+## Step 2 — Load open todos (compact)
 
 ```bash
-<sync> --days <N>   # default 7
+<list> --status open
 ```
 
-Capture full output.
+Read each file for id, keywords, body. Build compact string (one line per todo):
+```
+#1 [pipeline,crawler,adapter] Add adapter between pipeline and crawler
+#3 [kafka,error-handling] Automate error handling
+```
 
-## Step 3 — Parse
+## Step 3 — Find linked repos
 
-From output extract:
-- OPEN TODOS: each `FILE:` block → id, filename, project, keywords, body
-- GIT LOG: each repo section → `<hash> <date> <subject>`
+```bash
+ls linked/
+```
 
-## Step 4 — Match
+If no `linked/` or empty → print `(no linked repos)` and exit.
 
-A todo is **done** when a commit:
-- Directly references the todo's keywords, id, slug words, or body concepts
-- Clearly implements/ships what the todo describes
+## Step 4 — Spawn one agent per repo (ALL in parallel — single message)
 
-Skip vague commits: "fix", "wip", "update", "cleanup" with no specific overlap.
-One commit can close at most one todo (best fit wins).
+For each repo in `linked/`, spawn a Task tool call with subagent_type=`Bash`:
 
-## Step 5 — Apply
+```
+Read the role file at <role> — it defines your output contract.
 
-For each confident match:
+REPO_PATH: linked/<repo-name>
+DAYS: <N>
+TODOS:
+<compact todos list>
+
+Return only CLOSE: lines (and REPO: header). No PROPOSE: needed here.
+If no commits in this repo, return: REPO: <name> — no commits
+```
+
+**Critical**: launch ALL agents in a single response (parallel tool calls), one per repo.
+
+## Step 5 — Aggregate and apply
+
+Collect all agent responses. For each `CLOSE:` line, extract the id:
 ```bash
 <done> <id>
 ```
 
-On "multiple matches": retry with a longer slug substring.
-On "no match": skip and note it.
+Skip on error, note it.
 
-## Step 6 — Report (compact)
+## Step 6 — Report (compact, grouped by repo)
 
 ```
-git-close: last N days, X repos
+t:git-close — last N days
 
-✓ #3  fix-parser-bug       ← abc1234 fix: parser now handles edge cases
-✓ #7  implement-login      ← def5678 feat: login endpoint with JWT
+enty (8 commits):     ✓ #3 fix-parser-bug  ✓ #7 implement-login
+enty-docs (no commits)
+murmur (2 commits):   · no matches
 
-· #1  add-adapter          no match
-· #5  clean-up-frontend    no match
-
-Closed 2 of 9 open todos.
+Closed 2 / 9 todos.
 ```
 </process>

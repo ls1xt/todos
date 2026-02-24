@@ -1,74 +1,88 @@
 ---
 name: t:git-import
-description: Scan recent git commits and propose new follow-up todos not yet tracked
+description: Scan linked repo commits in parallel and propose new follow-up todos in batch
 argument-hint: [--days N]
 allowed-tools:
   - Bash
   - Read
+  - Task
 ---
 
 <objective>
-Other direction: git → new todos. Scan commits for work that suggests missing follow-ups, undone tasks, TODOs left in code, or areas that need docs/tests/cleanup. Propose them in batch — user confirms which to create.
+Spawn one Bash agent per linked repo in parallel. Each agent identifies commits suggesting missing todos and returns compact PROPOSE: results. Aggregate, present batch, create confirmed ones. Keep main context lean.
 </objective>
 
 <process>
-## Step 1 — Resolve scripts
+## Step 1 — Resolve paths
 
-- If `./todos/sync` exists → sync=`./todos/sync`, add=`./todos/add`, list=`./todos/list`
-- If `./sync` exists → sync=`./sync`, add=`./add`, list=`./list`
+- If `./todos/list` exists → list=`./todos/list`, add=`./todos/add`, role=`./todos/.claude/git-agent-role.md`
+- Else strip `todos/` prefix
 
-## Step 2 — Load context
+Parse `--days N` from `$ARGUMENTS` (default: 7).
 
-Run sync script to get:
-1. All open todos (to avoid proposing duplicates)
-2. Git log for last N days (default: 7)
+## Step 2 — Load open todos (compact, to avoid duplicates)
 
-## Step 3 — Scan for import candidates
-
-For each commit, look for signals that suggest a missing todo:
-
-- **Follow-ups**: commit adds feature X → maybe "Write docs for X", "Add tests for X"
-- **TODOs in diff**: `TODO`, `FIXME`, `HACK` comments added in commit
-- **Partial work**: commit message says "WIP", "partial", "initial", "scaffold" → suggest completion todo
-- **Breaking changes**: commit renames/removes something → suggest "Update usages of X"
-- **New dependencies**: commit adds a lib → maybe "Evaluate/document <lib> usage"
-
-Skip if an open todo already clearly covers the same ground.
-Propose max 8 candidates — quality over quantity.
-
-## Step 4 — Present proposals
-
-Print a numbered list:
-```
-git-import: N candidates from last D days
-
-  1. [enty] high  Write integration tests for login endpoint
-             → abc1234 feat: implement login endpoint with JWT
-
-  2. [enty] medium  Document new crawler adapter API
-             → def5678 add: adapter between pipeline and crawler
-
-  3. [murmur] low  Clean up TODO comment in injector.py
-             → ghi9012 fix: handle edge case in tmux injector
-
-  (skip remaining)
-```
-
-Then ask:
-```
-Add which? (e.g. "all", "1 3", "skip") →
-```
-
-## Step 5 — Create confirmed todos
-
-For each confirmed candidate, run:
 ```bash
-<add> "<title>" --priority <p> --project <project> --keywords <k1,k2,k3> --body "<1-2 sentences>"
+<list> --status open
 ```
 
-## Step 6 — Report
+Build compact list: `#id [keywords] title`
+
+## Step 3 — Find linked repos
+
+```bash
+ls linked/
+```
+
+## Step 4 — Spawn one agent per repo (ALL in parallel — single message)
+
+For each repo in `linked/`, spawn a Task tool call with subagent_type=`Bash`:
 
 ```
-git-import: added 2 todos (#23, #24). Skipped 1.
+Read the role file at <role> — it defines your output contract.
+
+REPO_PATH: linked/<repo-name>
+DAYS: <N>
+TODOS:
+<compact todos list>
+
+Return only PROPOSE: lines (and REPO: header). No CLOSE: needed here.
+If no commits: REPO: <name> — no commits
+```
+
+**Critical**: launch ALL agents in a single response (parallel tool calls).
+
+## Step 5 — Aggregate proposals
+
+Collect all `PROPOSE:` lines. Parse: title, priority, project, keywords, source hash.
+Deduplicate (same concept from multiple repos = one proposal, note both sources).
+Cap at 10 proposals — quality over quantity.
+
+## Step 6 — Present batch
+
+```
+t:git-import — N proposals from last D days
+
+  1. [enty] medium   Write integration tests for login endpoint
+             ← def5678 feat: implement login endpoint with JWT
+  2. [enty] low      Document crawler adapter API
+             ← abc1234 add: adapter between pipeline and crawler
+  3. [murmur] low    Clean up TODO in tmux injector
+             ← ghi9012 fix: edge case in injector
+
+Add which? ("all", "1 3", "skip") →
+```
+
+## Step 7 — Create confirmed todos
+
+For each confirmed:
+```bash
+<add> "<title>" --priority <p> --project <project> --keywords <kw1,kw2,kw3> --body "<1-2 sentence expansion>"
+```
+
+## Step 8 — Report
+
+```
+t:git-import: added 2 (#23 #24), skipped 1.
 ```
 </process>
