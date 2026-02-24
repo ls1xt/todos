@@ -36,6 +36,7 @@ for file in "$STATUS_DIR"/*.md; do
   PROJECT_VAL=$(grep -m1 '^project:' "$file" | sed 's/project:[[:space:]]*//')
   KEYWORDS_VAL=$(grep -m1 '^keywords:' "$file" | sed 's/keywords:[[:space:]]*//')
   CREATED_VAL=$(grep -m1 '^created:' "$file" | sed 's/created:[[:space:]]*//')
+  ID_VAL=$(grep -m1 '^id:' "$file" | sed 's/id:[[:space:]]*//')
 
   # Apply --project filter (exact match)
   if [[ -n "$PROJECT" && "$PROJECT_VAL" != "$PROJECT" ]]; then
@@ -52,5 +53,5 @@ for file in "$STATUS_DIR"/*.md; do
     continue
   fi
 
-  echo "${file}  ${PRIORITY}  ${PROJECT_VAL}  ${KEYWORDS_VAL}"
+  echo "${ID_VAL}  ${file}  ${PRIORITY}  ${PROJECT_VAL}  ${KEYWORDS_VAL}"
 done

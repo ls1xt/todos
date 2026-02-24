@@ -12,9 +12,18 @@ fi
 
 # Find matches in open/
 MATCHES=()
-for f in open/*"${PATTERN}"*; do
-  [[ -f "$f" ]] && MATCHES+=("$f")
-done
+if [[ "$PATTERN" =~ ^[0-9]+$ ]]; then
+  # Numeric argument: search by id: field in frontmatter
+  for f in open/*.md; do
+    [[ -f "$f" ]] || continue
+    FILE_ID=$(grep -m1 '^id:' "$f" | sed 's/id:[[:space:]]*//')
+    [[ "$FILE_ID" == "$PATTERN" ]] && MATCHES+=("$f")
+  done
+else
+  for f in open/*"${PATTERN}"*; do
+    [[ -f "$f" ]] && MATCHES+=("$f")
+  done
+fi
 
 if [[ ${#MATCHES[@]} -eq 0 ]]; then
   echo "no match: $PATTERN" >&2
@@ -31,7 +40,7 @@ fi
 
 FILE="${MATCHES[0]}"
 FILENAME="$(basename "$FILE")"
-TITLE="$(echo "$FILENAME" | sed 's/\.md$//' | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')"
+TITLE="$(echo "$FILENAME" | sed 's/\.md$//' | sed 's/^[0-9]\{4\}-[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')"
 
 git mv "$FILE" "${TARGET_DIR}/${FILENAME}"
 git commit -m "${ACTION}: ${TITLE}"

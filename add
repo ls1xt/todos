@@ -28,13 +28,24 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Read and increment ID counter from parent repo root
+COUNTER_FILE="$PWD/.next-id"
+if [[ -f "$COUNTER_FILE" ]]; then
+  ID=$(cat "$COUNTER_FILE")
+else
+  ID=1
+fi
+NEXT_ID=$(( ID + 1 ))
+printf '%d' "$NEXT_ID" > "$COUNTER_FILE"
+
 DATE=$(date +%Y-%m-%d)
 SLUG=$(echo "$TITLE" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd 'a-z0-9-')
-FILENAME="${DATE}-${SLUG}.md"
+FILENAME="$(printf '%04d' "$ID")-${DATE}-${SLUG}.md"
 FILEPATH="open/${FILENAME}"
 
-cat > "$FILEPATH" <<EOF
+cat > "$FILEPATH" <<FRONTMATTER
 ---
+id: ${ID}
 created: ${DATE}
 priority: ${PRIORITY}
 project: ${PROJECT}
@@ -42,9 +53,9 @@ keywords: ${KEYWORDS}
 body: ${BODY}
 transcription: ${TRANSCRIPTION}
 ---
-EOF
+FRONTMATTER
 
-git add "$FILEPATH"
+git add "$FILEPATH" "$COUNTER_FILE"
 git commit -m "add: ${TITLE}"
 
 echo "created: ${FILEPATH}"
