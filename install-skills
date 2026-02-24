@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Symlinks Claude skills from todos/.claude/commands/ into the parent repo's .claude/commands/
+# Copies Claude skills from todos/.claude/commands/ into the parent repo's .claude/commands/
 # Run from the parent repo root: todos/install-skills
 # Or from within the todos submodule: ./install-skills
 
 usage() {
   echo "Usage: install-skills [--dry-run]" >&2
-  echo "  Symlinks Claude skills from todos/.claude/commands/ into .claude/commands/" >&2
+  echo "  Copies Claude skills from todos/.claude/commands/ into .claude/commands/" >&2
   exit 1
 }
 
@@ -26,7 +26,6 @@ SRC="$SCRIPT_DIR/.claude/commands"
 
 # Destination: parent repo root
 if [[ "$SCRIPT_DIR" == */todos ]]; then
-  # Running as submodule — parent is one level up
   DEST="$(dirname "$SCRIPT_DIR")/.claude/commands"
 else
   DEST="$PWD/.claude/commands"
@@ -39,22 +38,22 @@ fi
 
 mkdir -p "$DEST"
 
-linked=0
+# Remove any stale symlinks from previous installs
+find "$DEST" -maxdepth 1 -name "*.md" -type l -delete 2>/dev/null || true
+
+copied=0
 for skill in "$SRC"/*.md; do
   [[ -f "$skill" ]] || continue
   name=$(basename "$skill")
-  dest_file="$DEST/$name"
   if [[ $DRY_RUN -eq 1 ]]; then
-    echo "would link: $name → $dest_file"
+    echo "would copy: $name"
   else
-    # Remove existing file or symlink before relinking
-    [[ -e "$dest_file" || -L "$dest_file" ]] && rm "$dest_file"
-    ln -s "$skill" "$dest_file"
-    echo "linked: $name"
-    ((linked++)) || true
+    cp "$skill" "$DEST/$name"
+    echo "copied: $name"
+    ((copied++)) || true
   fi
 done
 
 if [[ $DRY_RUN -eq 0 ]]; then
-  echo "Done — $linked skill(s) linked into $DEST"
+  echo "Done — $copied skill(s) installed to $DEST"
 fi
