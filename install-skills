@@ -38,17 +38,18 @@ fi
 
 mkdir -p "$DEST"
 
-# Remove all existing .md files (stale copies or symlinks) before fresh install
-find "$DEST" -maxdepth 1 -name "*.md" -delete 2>/dev/null || true
-
+# Only remove files that exist in the source (safe to overwrite — won't touch custom skills)
 copied=0
 for skill in "$SRC"/*.md; do
   [[ -f "$skill" ]] || continue
   name=$(basename "$skill")
+  dest_file="$DEST/$name"
   if [[ $DRY_RUN -eq 1 ]]; then
     echo "would copy: $name"
   else
-    cp "$skill" "$DEST/$name"
+    # Remove only the exact file we're about to replace (symlink or old copy)
+    [[ -e "$dest_file" || -L "$dest_file" ]] && rm "$dest_file"
+    cp "$skill" "$dest_file"
     echo "copied: $name"
     ((copied++)) || true
   fi
