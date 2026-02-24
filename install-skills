@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Copies Claude skills from todos/.claude/commands/ to the parent repo's .claude/commands/
+# Symlinks Claude skills from todos/.claude/commands/ into the parent repo's .claude/commands/
 # Run from the parent repo root: todos/install-skills
 # Or from within the todos submodule: ./install-skills
 
 usage() {
   echo "Usage: install-skills [--dry-run]" >&2
-  echo "  Copies Claude skills from todos/.claude/commands/ to .claude/commands/" >&2
+  echo "  Symlinks Claude skills from todos/.claude/commands/ into .claude/commands/" >&2
   exit 1
 }
 
@@ -39,19 +39,22 @@ fi
 
 mkdir -p "$DEST"
 
-copied=0
+linked=0
 for skill in "$SRC"/*.md; do
   [[ -f "$skill" ]] || continue
   name=$(basename "$skill")
+  dest_file="$DEST/$name"
   if [[ $DRY_RUN -eq 1 ]]; then
-    echo "would copy: $name → $DEST/$name"
+    echo "would link: $name → $dest_file"
   else
-    cp "$skill" "$DEST/$name"
-    echo "copied: $name"
-    ((copied++)) || true
+    # Remove existing file or symlink before relinking
+    [[ -e "$dest_file" || -L "$dest_file" ]] && rm "$dest_file"
+    ln -s "$skill" "$dest_file"
+    echo "linked: $name"
+    ((linked++)) || true
   fi
 done
 
 if [[ $DRY_RUN -eq 0 ]]; then
-  echo "Done — $copied skill(s) installed to $DEST"
+  echo "Done — $linked skill(s) linked into $DEST"
 fi
