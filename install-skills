@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Copies Claude skills from todos/.claude/commands/ to the parent repo's .claude/commands/
+# Run from the parent repo root: todos/install-skills
+# Or from within the todos submodule: ./install-skills
+
+usage() {
+  echo "Usage: install-skills [--dry-run]" >&2
+  echo "  Copies Claude skills from todos/.claude/commands/ to .claude/commands/" >&2
+  exit 1
+}
+
+DRY_RUN=0
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --dry-run) DRY_RUN=1; shift ;;
+    -h|--help) usage ;;
+    *) echo "Unknown option: $1" >&2; usage ;;
+  esac
+done
+
+# Determine source: running as submodule (todos/install-skills) or standalone (./install-skills)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SRC="$SCRIPT_DIR/.claude/commands"
+
+# Destination: parent repo root
+if [[ "$SCRIPT_DIR" == */todos ]]; then
+  # Running as submodule — parent is one level up
+  DEST="$(dirname "$SCRIPT_DIR")/.claude/commands"
+else
+  DEST="$PWD/.claude/commands"
+fi
+
+if [[ ! -d "$SRC" ]]; then
+  echo "No skills found at $SRC" >&2
+  exit 1
+fi
+
+mkdir -p "$DEST"
+
+copied=0
+for skill in "$SRC"/*.md; do
+  [[ -f "$skill" ]] || continue
+  name=$(basename "$skill")
+  if [[ $DRY_RUN -eq 1 ]]; then
+    echo "would copy: $name → $DEST/$name"
+  else
+    cp "$skill" "$DEST/$name"
+    echo "copied: $name"
+    ((copied++)) || true
+  fi
+done
+
+if [[ $DRY_RUN -eq 0 ]]; then
+  echo "Done — $copied skill(s) installed to $DEST"
+fi

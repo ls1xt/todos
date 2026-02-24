@@ -1,32 +1,71 @@
 #!/usr/bin/env bash
 set -e
 
-REPO_ARG="$1"
-
-if [[ -z "$REPO_ARG" ]]; then
-  echo "usage: session [business|personal]" >&2
-  exit 1
-fi
-
-case "$REPO_ARG" in
-  business)
-    REPO_PATH="${TODOS_BUSINESS_REPO:-$HOME/business}"
-    ;;
-  personal)
-    REPO_PATH="${TODOS_PERSONAL_REPO:-$HOME/personal}"
-    ;;
-  *)
-    echo "usage: session [business|personal]" >&2
-    exit 1
-    ;;
-esac
+# Starts or attaches to the "todo" tmux session running Claude Code.
+# Must be run from a todos repo root (where CLAUDE.md lives),
+# or as todos/session from a parent repo.
+#
+# Usage:
+#   todos/session            # start or attach
+#   todos/session --detach   # start in background
+#   todos/session --kill     # kill session
 
 SESSION="todo"
+DETACH=false
+KILL=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --detach|-d) DETACH=true; shift ;;
+    --kill|-k)   KILL=true;   shift ;;
+    -h|--help)
+      echo "Usage: todos/session [--detach] [--kill]" >&2
+      exit 0 ;;
+    *) echo "Unknown option: $1" >&2; exit 1 ;;
+  esac
+done
+
+# Resolve repo root: parent dir if running as submodule, else cwd
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SCRIPT_DIR/../CLAUDE.md" ]]; then
+  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+else
+  REPO_ROOT="$SCRIPT_DIR"
+fi
+
+if $KILL; then
+  if tmux has-session -t "$SESSION" 2>/dev/null; then
+    tmux kill-session -t "$SESSION"
+    echo "Session '$SESSION' killed."
+  else
+    echo "No session '$SESSION' found."
+  fi
+  exit 0
+fi
 
 if tmux has-session -t "$SESSION" 2>/dev/null; then
-  tmux attach-session -t "$SESSION"
+  echo "Session '$SESSION' already running."
 else
-  tmux new-session -d -s "$SESSION" -c "$REPO_PATH"
-  tmux send-keys -t "$SESSION" "claude" Enter
+  echo "Starting tmux session '$SESSION' in $REPO_ROOT..."
+  tmux new-session -d -s "$SESSION" -x 220 -y 50 -c "$REPO_ROOT"
+  sleep 0.3
+  tmux send-keys -t "$SESSION:0.0" "claude" Enter
+
+  echo "Claude Code started in session '$SESSION'."
+  echo ""
+  echo "Murmur binding — add to ~/.config/murmur/config.json:"
+  printf '  {\n'
+  printf '    "modifiers": ["KEY_LEFTCTRL", "KEY_LEFTMETA"],\n'
+  printf '    "trigger": "KEY_T",\n'
+  printf '    "mode": "toggle",\n'
+  printf '    "destination": "tmux:todo:0.0",\n'
+  printf '    "append_enter": true\n'
+  printf '  }\n'
+fi
+
+if $DETACH; then
+  echo ""
+  echo "Attach with: tmux attach -t $SESSION"
+else
   tmux attach-session -t "$SESSION"
 fi
