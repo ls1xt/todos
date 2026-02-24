@@ -38,8 +38,8 @@ fi
 
 mkdir -p "$DEST"
 
-# Remove any stale symlinks from previous installs
-find "$DEST" -maxdepth 1 -name "*.md" -type l -delete 2>/dev/null || true
+# Remove all existing .md files (stale copies or symlinks) before fresh install
+find "$DEST" -maxdepth 1 -name "*.md" -delete 2>/dev/null || true
 
 copied=0
 for skill in "$SRC"/*.md; do
