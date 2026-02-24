@@ -38,18 +38,19 @@ fi
 
 mkdir -p "$DEST"
 
-# Only remove files that exist in the source (safe to overwrite — won't touch custom skills)
+# Remove all previously installed t:*.md files (custom skills with other names are untouched)
+if [[ $DRY_RUN -eq 0 ]]; then
+  find "$DEST" -maxdepth 1 -name "t:*.md" -delete 2>/dev/null || true
+fi
+
 copied=0
 for skill in "$SRC"/*.md; do
   [[ -f "$skill" ]] || continue
   name=$(basename "$skill")
-  dest_file="$DEST/$name"
   if [[ $DRY_RUN -eq 1 ]]; then
     echo "would copy: $name"
   else
-    # Remove only the exact file we're about to replace (symlink or old copy)
-    [[ -e "$dest_file" || -L "$dest_file" ]] && rm "$dest_file"
-    cp "$skill" "$dest_file"
+    cp "$skill" "$DEST/$name"
     echo "copied: $name"
     ((copied++)) || true
   fi
