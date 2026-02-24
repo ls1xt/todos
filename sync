@@ -29,11 +29,11 @@ if [[ -d "$REPO_ROOT/open" ]]; then
   for f in "$REPO_ROOT"/open/*.md; do
     [[ -f "$f" ]] || continue
     found_todos=1
-    slug=$(basename "$f" .md | sed 's/^[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
+    slug=$(basename "$f" .md | sed 's/^[0-9]\{4\}-[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}-//')
     echo "FILE: $(basename "$f")"
     echo "slug: $slug"
     echo "title: $(echo "$slug" | tr '-' ' ')"
-    grep -E "^(project|keywords|body|priority):" "$f" 2>/dev/null || true
+    grep -E "^(id|project|keywords|body|priority):" "$f" 2>/dev/null || true
     echo "---"
   done
   [[ $found_todos -eq 0 ]] && echo "(no open todos)"
