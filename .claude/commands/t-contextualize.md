@@ -1,5 +1,5 @@
 ---
-name: todos:contextualize
+name: t:contextualize
 description: Deep-check a todo against linked repos — is it still relevant, already done, or changed shape?
 argument-hint: <id-or-slug>
 allowed-tools:

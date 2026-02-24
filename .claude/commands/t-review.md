@@ -1,5 +1,5 @@
 ---
-name: todos:review
+name: t:review
 description: Summarize and analyze open todos by priority, with optional repo context
 argument-hint: [--days N] [--no-repos]
 allowed-tools:

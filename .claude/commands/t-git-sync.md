@@ -1,5 +1,5 @@
 ---
-name: todos:git-sync
+name: t:git-sync
 description: Full git sync — mark completed todos as done AND propose new follow-up todos from linked repo commits
 argument-hint: [--days N]
 allowed-tools:

@@ -1,5 +1,5 @@
 ---
-name: todos:triage
+name: t:triage
 description: Batch-process open todos — compact table, one command to done/drop/reprioritize multiple
 argument-hint: [--project <name>]
 allowed-tools:

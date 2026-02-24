@@ -1,5 +1,5 @@
 ---
-name: todos:next
+name: t:next
 description: Show ranked open todos so you can pick what to work on next
 argument-hint: [--time <2h|day|week>] [--project <name>]
 allowed-tools:

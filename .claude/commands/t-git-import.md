@@ -1,5 +1,5 @@
 ---
-name: todos:git-import
+name: t:git-import
 description: Scan recent git commits and propose new follow-up todos not yet tracked
 argument-hint: [--days N]
 allowed-tools:

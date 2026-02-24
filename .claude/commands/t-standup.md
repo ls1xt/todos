@@ -1,5 +1,5 @@
 ---
-name: todos:standup
+name: t:standup
 description: One-shot standup digest — what was done recently, what's open and high priority
 argument-hint: [--days N]
 allowed-tools:

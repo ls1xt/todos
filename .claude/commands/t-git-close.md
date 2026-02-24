@@ -1,5 +1,5 @@
 ---
-name: todos:git-close
+name: t:git-close
 description: Scan recent git commits and auto-mark matching open todos as done
 argument-hint: [--days N]
 allowed-tools:

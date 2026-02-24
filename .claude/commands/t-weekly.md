@@ -1,5 +1,5 @@
 ---
-name: todos:weekly
+name: t:weekly
 description: Weekly digest — completed todos + shipped code narrative, grouped by project
 argument-hint: [--days N]
 allowed-tools:
